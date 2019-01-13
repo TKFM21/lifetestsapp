@@ -1,0 +1,27 @@
+@extends('layouts.app')
+
+@section('content')
+    <div class="text-center">
+        <h1>Log in</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+
+            {!! Form::open(['route' => 'login']) !!}
+                <div class="form-group">
+                    {!! Form::label('code', 'Code') !!}
+                    {!! Form::text('code', old('code'), ['class' => 'form-control']) !!}
+                </div>
+
+                <div class="form-group">
+                    {!! Form::label('password', 'Password') !!}
+                    {!! Form::password('password', ['class' => 'form-control']) !!}
+                </div>
+
+                {!! Form::submit('Log in', ['class' => 'btn btn-primary btn-block']) !!}
+            {!! Form::close() !!}
+
+        </div>
+    </div>
+@endsection

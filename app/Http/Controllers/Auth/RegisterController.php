@@ -7,6 +7,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Events\Registered;
+
+use App\Gender;
+use App\Department;
+use App\Role;
+
 class RegisterController extends Controller
 {
     /*
@@ -27,7 +35,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -36,7 +44,22 @@ class RegisterController extends Controller
      */
     public function __construct()
     {
+        //$this->middleware('auth');
         $this->middleware('guest');
+    }
+
+    public function showRegistrationForm()
+    {
+        $data = [];
+        $genders = Gender::all()->pluck('gender', 'id');
+        $departments = Department::all()->pluck('department', 'id');
+        $roles = Role::all()->pluck('role', 'id');
+        $data = [
+            'genders' => $genders,
+            'departments' => $departments,
+            'roles' => $roles,
+        ];
+        return view('auth.register', $data);
     }
 
     /**
@@ -48,9 +71,13 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'code' => 'required|string|max:100|unique:users',
+            'name' => 'required|string|max:100',
+            'gender_id' => 'required|integer',
+            'email' => 'required|string|email|max:100|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'department_id' => 'required|integer',
+            'role_id' => 'required|integer',
         ]);
     }
 
@@ -63,9 +90,32 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         return User::create([
+            'code' => $data['code'],
             'name' => $data['name'],
+            'gender_id' => $data['gender_id'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
+            'department_id' => $data['department_id'],
+            'role_id' => $data['role_id'],
         ]);
     }
+    
+    /**
+     * Handle a registration request for the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        event(new Registered($user = $this->create($request->all())));
+
+        //$this->guard()->login($user);
+
+        return $this->registered($request, $user)
+                        ?: redirect($this->redirectPath());
+    }
+    
 }
