@@ -21,9 +21,6 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::get('/', 'HomeController@index')->name('home');
 
-Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
-Route::post('register', 'Auth\RegisterController@register');
-
 // システム管理者のみ
 Route::group(['middleware' => ['auth', 'can:system-only']], function () {
     //
@@ -33,8 +30,8 @@ Route::group(['middleware' => ['auth', 'can:system-only']], function () {
 Route::group(['middleware' => ['auth', 'can:admin-higher']], function () {
     
     // Registration Routes...
-    //Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
-    //Route::post('register', 'Auth\RegisterController@register');
+    Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
+    Route::post('register', 'Auth\RegisterController@register');
 
 });
 
